@@ -1,0 +1,91 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26124.0
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{463E725C-0D9C-41C3-9D29-42E4289E552D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Net", "src\Chat.Net\Chat.Net.csproj", "{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C109C830-0ED5-414E-9F7D-451FD92DFF23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Net.Tests", "test\Chat.Net.Tests\Chat.Net.Tests.csproj", "{4149EC2B-F0C7-4CBC-997B-F15791005A8C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{AF8192B5-B2EC-4FFF-8237-4384C97229A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chat.Net.Samples", "Chat.Net.Samples", "{34754892-232C-4A1F-B3D6-4C3D2DDF21D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Net.Samples.Client", "samples\Chat.Net.Samples\Chat.Net.Samples.Client\Chat.Net.Samples.Client.csproj", "{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Net.Samples.Server", "samples\Chat.Net.Samples\Chat.Net.Samples.Server\Chat.Net.Samples.Server.csproj", "{6F8FBB47-E660-471B-BEB0-93E9335AF595}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|x64.Build.0 = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Debug|x86.Build.0 = Debug|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|x64.ActiveCfg = Release|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|x64.Build.0 = Release|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|x86.ActiveCfg = Release|Any CPU
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5}.Release|x86.Build.0 = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|x64.Build.0 = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Debug|x86.Build.0 = Debug|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|x64.ActiveCfg = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|x64.Build.0 = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|x86.ActiveCfg = Release|Any CPU
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C}.Release|x86.Build.0 = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|x64.Build.0 = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Debug|x86.Build.0 = Debug|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|x64.ActiveCfg = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|x64.Build.0 = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6}.Release|x86.Build.0 = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|x64.Build.0 = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|x64.ActiveCfg = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|x64.Build.0 = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F8E9E5AB-5E32-4CEE-BBC2-9B1D3CDAE9E5} = {463E725C-0D9C-41C3-9D29-42E4289E552D}
+		{4149EC2B-F0C7-4CBC-997B-F15791005A8C} = {C109C830-0ED5-414E-9F7D-451FD92DFF23}
+		{34754892-232C-4A1F-B3D6-4C3D2DDF21D8} = {AF8192B5-B2EC-4FFF-8237-4384C97229A8}
+		{6481EAAB-4DC7-460A-87AF-C3E36C4C69D6} = {34754892-232C-4A1F-B3D6-4C3D2DDF21D8}
+		{6F8FBB47-E660-471B-BEB0-93E9335AF595} = {34754892-232C-4A1F-B3D6-4C3D2DDF21D8}
+	EndGlobalSection
+EndGlobal
