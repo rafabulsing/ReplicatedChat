@@ -33,5 +33,10 @@ namespace Chat.Net
             }
             ServerSocket.Stop();
         }
+
+        public bool Pending()
+        {
+            return ServerSocket.Pending();
+        }
     }
 }
