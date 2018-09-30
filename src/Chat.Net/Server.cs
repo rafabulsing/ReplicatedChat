@@ -9,7 +9,7 @@ namespace Chat.Net
     public class Server
     {
         private TcpListener ServerSocket { get; set; }
-        private List<Connection> Connections { get; set; } = new List<Connection>();
+        public List<Connection> Connections { get; private set; } = new List<Connection>();
 
         public void Start(string ipAddress, int port)
         {
