@@ -84,8 +84,8 @@ namespace Chat.Net.Tests
             Assert.Equal(unicodeMessage, result);
         }
 
-       [Fact]
-       public void Receive_EmptyStream_ReturnsEmptyString()
+        [Fact]
+        public void Receive_EmptyStream_ReturnsEmptyString()
        {
             var messenger = new Messenger();
             var stream = new MemoryStream();
