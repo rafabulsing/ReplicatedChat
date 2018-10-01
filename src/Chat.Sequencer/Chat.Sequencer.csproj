@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Chat.Net\Chat.Net.csproj"/>
+    <ProjectReference Include="..\Chat.Net\Chat.Net.csproj" />
+    <ProjectReference Include="..\Chat.Core\Chat.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
