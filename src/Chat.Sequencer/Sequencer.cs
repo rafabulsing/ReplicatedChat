@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json.Linq;
 
+using Chat.Core;
 using Chat.Net;
 
 namespace Chat.Sequencer
@@ -11,9 +12,8 @@ namespace Chat.Sequencer
     public class Sequencer
     {
         private Server Server;
-        private List<Connection> Connections {
-            get => Server.Connections;
-        }
+        private List<Connection> Clients;
+        private List<Connection> Replicas;
 
         public string IpAddress { get; private set; }
         public int Port { get; private set; }
@@ -58,36 +58,61 @@ namespace Chat.Sequencer
             {
                 if (Server.Pending())
                 {
-                    Server.AcceptConnection();
+                    var newConnection = Server.AcceptConnection();
+                    CategorizeConnection(newConnection);
                 }
 
                 string message, sequenced;
-                foreach(var c in Connections)
+                foreach(var client in Clients)
                 {
                     try{
-                        message = c.Receive();
+                        message = client.Receive();
                         
                         if (message != "")
                         {
-                            sequenced = SequencedMessage(message);
-                            History.Add(sequenced);
-                            Server.Broadcast(sequenced);
+                            sequenced = AddToSequence(message);
+                            
+                            foreach(var replica in Replicas)
+                            {
+                                replica.Send(sequenced);
+                            }
+
                             Console.WriteLine(sequenced);
                         }
                     }
                     catch (IOException)
                     {
-                        Console.WriteLine("Server disconnected.");
+                        Console.WriteLine("Client disconnected.");
                     }
                 }
      
             }
         }
 
-        private string SequencedMessage(string message)
+        private void CategorizeConnection(Connection connection)
         {
-            var sequenced = "[" + SeqNumber + "]" + message;
+            var messageText = connection.Receive();
+            var message = new Message(messageText);
+
+            if (message.Type == ProcessType.Client)
+            {
+                Clients.Add(connection);
+            }
+            else if (message.Type == ProcessType.Replica)
+            {
+                Replicas.Add(connection);
+            }
+            else 
+            {
+                connection.Disconnect();
+            }
+        }
+
+        private string AddToSequence(string message)
+        {
+            var sequenced = Message.CreateWithNewOrder(message, SeqNumber);
             ++SeqNumber;
+            History.Add(sequenced);
             return sequenced;
         }
 
