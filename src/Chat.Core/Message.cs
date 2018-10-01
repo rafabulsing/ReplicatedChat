@@ -4,12 +4,12 @@ namespace Chat.Core
 {
     public class Message
     {
-        public int TotalOrder   { get; private set; }
-        public ProcessType Type { get; private set; }
-        public int ProcessId    { get; private set; }
-        public int MessageId    { get; private set; }
-        public Command Command  { get; private set; }
-        public string[] Args    { get; private set; }
+        public int TotalOrder   { get; set; }
+        public ProcessType Type { get; set; }
+        public int ProcessId    { get; set; }
+        public int MessageId    { get; set; }
+        public Command Command  { get; set; }
+        public string[] Args    { get; set; }
 
         private string OriginalText { get; set; }
 
