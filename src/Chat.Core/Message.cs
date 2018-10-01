@@ -11,9 +11,14 @@ namespace Chat.Core
         public Command Command  { get; private set; }
         public string[] Args    { get; private set; }
 
+        private string OriginalText { get; set; }
+
         public Message(string messageText)
         {
-            var parts = messageText.Split("|",StringSplitOptions.None);
+            OriginalText = messageText;
+
+            var separators = new char[]{'|'};
+            var parts = messageText.Split(separators, StringSplitOptions.None);
 
             TotalOrder = Int32.Parse(parts[0]);
             Type       = ParseProcessType(parts[1]);
@@ -38,11 +43,11 @@ namespace Chat.Core
                     return ProcessType.Sequencer;
                 
                 default:
-                    throw ArgumentException(String.Format("{0} is not a valid ProcessType.", str));
+                    throw new ArgumentException(String.Format("{0} is not a valid ProcessType.", str));
             }
         }
     
-        private CommandType ParseCommand(string str)
+        private Command ParseCommand(string str)
         {
             str = str.ToLower();
             switch(str)
@@ -60,16 +65,21 @@ namespace Chat.Core
                     return Command.CatchUp;
 
                 default:
-                    throw ArgumentException(String.Format("{0} is not a valid Command.", str));
+                    throw new ArgumentException(String.Format("{0} is not a valid Command.", str));
             }
         }
 
         private string[] GetArgs(string[] parts)
         {
             int length = parts.Length-6;
-            var args = new string[lenght];
+            var args = new string[length];
             Array.Copy(parts, 5, args, 0, length);
             return args;
+        }
+    
+        override public string ToString()
+        {
+            return OriginalText;
         }
     }
 }
