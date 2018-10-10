@@ -15,6 +15,25 @@ namespace Chat.Core
 
         private string OriginalText { get; set; }
 
+        public Message(int totalOrder, ProcessType type, int processId, int messageId, Command command, string[] args = null)
+        {
+            TotalOrder = totalOrder;
+            Type = type;
+            ProcessId = processId;
+            MessageId = messageId;
+            Command = command;
+            Args = args;
+
+            OriginalText = String.Format("{0}|{1}|{2}|{3}|{4}|", TotalOrder, Enum.GetName(typeof(ProcessType), Type), ProcessId, MessageId, Enum.GetName(typeof(Command), Command));
+
+            foreach(var arg in args)
+            {
+                OriginalText += "|" + arg;
+            }
+        }
+
+
+
         public Message(string messageText)
         {
             OriginalText = messageText;
