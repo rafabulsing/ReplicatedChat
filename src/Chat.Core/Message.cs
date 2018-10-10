@@ -15,6 +15,27 @@ namespace Chat.Core
 
         private string OriginalText { get; set; }
 
+        public Message(int totalOrder, ProcessType type, int processId, int messageId, Command command, string arg) : this(totalOrder, type, processId, messageId, command, new string[1]{arg}) { }
+
+        public Message(int totalOrder, ProcessType type, int processId, int messageId, Command command, string[] args = null)
+        {
+            TotalOrder = totalOrder;
+            Type = type;
+            ProcessId = processId;
+            MessageId = messageId;
+            Command = command;
+            Args = args;
+
+            OriginalText = String.Format("{0}|{1}|{2}|{3}|{4}|", TotalOrder, Enum.GetName(typeof(ProcessType), Type), ProcessId, MessageId, Enum.GetName(typeof(Command), Command));
+
+            foreach(var arg in args)
+            {
+                OriginalText += "|" + arg;
+            }
+        }
+
+
+
         public Message(string messageText)
         {
             OriginalText = messageText;
@@ -72,7 +93,7 @@ namespace Chat.Core
 
         private string[] GetArgs(string[] parts)
         {
-            int length = parts.Length-6;
+            int length = parts.Length-5;
             var args = new string[length];
             Array.Copy(parts, 5, args, 0, length);
             return args;
