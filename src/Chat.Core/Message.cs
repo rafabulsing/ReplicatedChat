@@ -15,6 +15,8 @@ namespace Chat.Core
 
         private string OriginalText { get; set; }
 
+        public Message(int totalOrder, ProcessType type, int processId, int messageId, Command command, string arg) : this(totalOrder, type, processId, messageId, command, new string[1]{arg}) { }
+
         public Message(int totalOrder, ProcessType type, int processId, int messageId, Command command, string[] args = null)
         {
             TotalOrder = totalOrder;
@@ -91,7 +93,7 @@ namespace Chat.Core
 
         private string[] GetArgs(string[] parts)
         {
-            int length = parts.Length-6;
+            int length = parts.Length-5;
             var args = new string[length];
             Array.Copy(parts, 5, args, 0, length);
             return args;
