@@ -27,6 +27,8 @@ namespace Chat.Sequencer
             Server = new Server();
             SeqNumber = 0;
             History = new List<string>();
+            Clients = new List<Connection>();
+            Replicas = new List<Connection>();
         }
 
         public void Setup(FileStream configsFile)

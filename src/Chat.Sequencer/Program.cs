@@ -7,7 +7,7 @@ namespace Chat.Sequencer
     {
         static void Main(string[] args)
         {
-            var configsPath = "configs.json";
+            var configsPath = "../configs.json";
             var configsFile = new FileStream(configsPath, FileMode.Open);
 
             var seq = new Sequencer();
