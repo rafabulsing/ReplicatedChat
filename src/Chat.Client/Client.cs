@@ -84,7 +84,9 @@ namespace Chat.Client
                 try
                 {
                     var c = new Chat.Net.Client();
-                    Replicas.Add(c.Connect(ReplicasIps[i], ReplicasPorts[1]));
+                    var replica = c.Connect(ReplicasIps[i], ReplicasPorts[1]);
+                    Replicas.Add(replica);
+                    Send(replica, Command.Connect);
                     Console.WriteLine("Connected to replica " + i + ".");
                 }
                 catch
