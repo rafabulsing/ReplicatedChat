@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Chat.Replica
 {
@@ -6,7 +7,12 @@ namespace Chat.Replica
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var configsPath = "../configs.json";
+            var configsFile = new FileStream(configsPath, FileMode.Open);
+
+            var r = new Replica(Int32.Parse(args[0]));
+            r.Setup(configsFile);
+            r.Start();
         }
     }
 }
