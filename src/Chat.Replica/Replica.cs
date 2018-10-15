@@ -130,12 +130,26 @@ namespace Chat.Replica
                 var message = new Message(messageStr);
 
                 if(message.Command == Command.CatchUp)
-                {
-                    connection.Send(new Message(1,ProcessType.Replica,Id,0,Command.Send, "Historico").ToString());
-                    /*
-                     * ...::AJUSTAR::...
-                     * Enviar Log para a conexão
-                     */
+                { 
+                    var historyList = new List<string>();
+                    using (StreamReader r = new StreamReader(File.OpenRead(LogFilePath)))
+                    {
+                        for(int i=0; i<Int32.Parse(message.Args[0]); ++i)
+                        {
+                            r.ReadLine();
+                        }
+
+                        while(!r.EndOfStream)
+                        {
+                            historyList.Add(r.ReadLine());
+                        }
+                    }
+                    var history = historyList.ToArray();
+
+                    var reply = new Message(NextMessageOrder, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, history);
+
+                    connection.Send(reply.ToString());
+
                 }
             }
             catch(System.IO.IOException)
