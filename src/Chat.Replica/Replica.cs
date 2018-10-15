@@ -215,10 +215,7 @@ namespace Chat.Replica
                     }
                     else if (message.Command == Command.Send)
                     {
-                        /*
-                         * ...::AJUSTAR::...
-                         * salvar mensagem
-                         */
+                        LogMessage(message);
                     }
                 }
                 catch (IOException)
