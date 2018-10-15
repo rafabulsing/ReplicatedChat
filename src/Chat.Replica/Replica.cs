@@ -28,6 +28,8 @@ namespace Chat.Replica
         private int Port;
         private Server Server;
 
+        private string LogFilePath;
+
         public Replica(int id)
         {
             Id = id;
@@ -67,11 +69,11 @@ namespace Chat.Replica
                 }
             }
 
-            var logFilePath = configs["replicas"][Id]["logFile"].Value<string>();
+            LogFilePath = configs["replicas"][Id]["logFile"].Value<string>();
 
-            if (!File.Exists(logFilePath))
+            if (!File.Exists(LogFilePath))
             {
-                File.Create(logFilePath).Close();
+                File.Create(LogFilePath).Close();
             }
         }
 
