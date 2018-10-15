@@ -160,15 +160,17 @@ namespace Chat.Replica
             {
                 try
                 {
-                    string message = Sequencer.Receive();
-                    while("".Equals(message) )
+                    string messageStr = Sequencer.Receive();
+                    while("".Equals(messageStr) )
                     {
-                        message = Sequencer.Receive();
+                        messageStr = Sequencer.Receive();
                     }
 
-                    Console.WriteLine(message);
+                    Console.WriteLine(messageStr);
 
-                    if (new Message(message).Command == Command.CatchUp)
+                    var message = new Message(messageStr);
+
+                    if (message.Command == Command.CatchUp)
                     {
                         for (int i = 0; i < Clients.Count; i++)
                         {
@@ -178,7 +180,7 @@ namespace Chat.Replica
                                  * ...::AJUSTAR::...
                                  * Enviar todas mensagens que faltam
                                  */
-                                Clients[i].Send(message);
+                                Clients[i].Send(messageStr);
                             }
                             catch(System.IO.IOException)
                             {
