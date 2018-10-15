@@ -10,17 +10,17 @@
         {
             "ipAddress" : "127.0.0.1",
             "port" : 8801,
-            "logFile" : "log_server_0.txt"
+            "logFile" : "log_replica_0.txt"
         },
         {
             "ipAddress" : "127.0.0.2",
             "port" : 8802,
-            "logFile" : "log_server_1.txt"
+            "logFile" : "log_replica_1.txt"
         },
         {
             "ipAddress" : "127.0.0.3",
             "port" : 8803,
-            "logFile" : "log_server_2.txt"
+            "logFile" : "log_replica_2.txt"
         }
     ]
 }
