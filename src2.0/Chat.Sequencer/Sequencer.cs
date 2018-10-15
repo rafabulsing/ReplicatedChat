@@ -24,6 +24,8 @@ namespace Chat.Sequencer
 
         private List<string> History { get; set; }
 
+        Semaphore semaphoreObject = new Semaphore(initialCount: 1, maximumCount: 1);
+
         public Sequencer()
         {
             Server = new Server();
@@ -85,16 +87,16 @@ namespace Chat.Sequencer
                 }
                 else
                 {
-                    string sequenced = AddToSequence(message);
-                    Console.WriteLine("Received: " + message);
+                    if(new Message(message).Command == Command.Send)
+                    {
+                        message = AddToSequence(message);
+                        Console.WriteLine("Received: " + message);
+                    }
+
                     for (int i = 0; i < Replicas.Count; i++)
                     {
                         try
                         {
-                            /*
-                             * ...::AJUSTAR::...
-                             * Incrementar contador e tals
-                             */
                             Replicas[i].Send(message);
                         }
                         catch(System.IO.IOException)
@@ -134,9 +136,11 @@ namespace Chat.Sequencer
 
         private string AddToSequence(string message)
         {
+            semaphoreObject.WaitOne();
             var sequenced = Message.CreateWithNewOrder(message, SeqNumber);
             ++SeqNumber;
             History.Add(sequenced);
+            semaphoreObject.Release();
             return sequenced;
         }
     }

@@ -88,7 +88,11 @@ namespace Chat.Client
                 else if(aux == 2)
                 {
                     ConnectToReplicas();
-                    Send(Sequencer,Command.Send, new string[]{"RECEIVE"});
+                    /*
+                     * ...:AJUSTAR:...
+                     * Enviar Mensagem de Leitura com o numero da ultima mensagem recebida
+                     */
+                    Send(Sequencer,Command.CatchUp, new string[]{"RECEIVE"});
                     Listen();
                 }
                 else

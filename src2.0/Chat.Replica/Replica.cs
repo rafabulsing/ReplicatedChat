@@ -100,6 +100,7 @@ namespace Chat.Replica
         }
         private void HandleConnectionReplicas(Connection connection)
         {
+
             try
             {
                 string message = connection.Receive();
@@ -107,6 +108,10 @@ namespace Chat.Replica
                 {
                     message = connection.Receive();
                 }
+                /*
+                 * ...::AJUSTAR::...
+                 * Pegar pelo CatchUp e não pelo RECOVER
+                 */
                 if("RECOVER".Equals(message))
                 {
                     connection.Send("Historico");
@@ -160,13 +165,10 @@ namespace Chat.Replica
                     {
                         message = Sequencer.Receive();
                     }
-                    /*
-                     * ...::AJUSTAR::...
-                     * separar mensagem
-                     */
+
                     Console.WriteLine(message);
 
-                    if ("RECEIVE".Equals(message) )
+                    if (new Message(message).Command == Command.CatchUp)
                     {
                         for (int i = 0; i < Clients.Count; i++)
                         {
