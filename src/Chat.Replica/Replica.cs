@@ -151,6 +151,7 @@ namespace Chat.Replica
             {
                 w.WriteLine(message.TotalOrder + " " + message.Args[0]);
             }
+            ++NextMessageOrder;
         }
 
         
@@ -223,7 +224,6 @@ namespace Chat.Replica
                         if (message.TotalOrder == NextMessageOrder)
                         {
                             LogMessage(message);
-                            ++NextMessageOrder;
                         }
                         else
                         {
