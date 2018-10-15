@@ -87,11 +87,9 @@ namespace Chat.Sequencer
                 }
                 else
                 {
-                    if(new Message(message).Command == Command.Send)
-                    {
-                        message = AddToSequence(message);
-                        Console.WriteLine("Received: " + message);
-                    }
+                
+                    message = AddToSequence(message);
+                    Console.WriteLine("Received: " + message);
 
                     for (int i = 0; i < Replicas.Count; i++)
                     {
@@ -107,7 +105,7 @@ namespace Chat.Sequencer
                             Console.WriteLine("Replica Disconnected.");
                         }
                     }
-                    Console.WriteLine ("\n-----------------\n");
+                    Console.WriteLine ("-----------------");
                 }
             }
         }

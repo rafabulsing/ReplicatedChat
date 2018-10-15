@@ -30,12 +30,14 @@ namespace Chat.Client
 
         private int Id;
         private int MessageId;
-        Semaphore semaphoreObject = new Semaphore(initialCount:1,maximumCount:1);
+
+        private int IdLastMessage;
 
         public Client(int id)
         {
             Id = id;
             MessageId = 0;
+            IdLastMessage = 0;
 
             ReplicasIps = new List<string>();
             ReplicasPorts = new List<int>();
@@ -87,12 +89,7 @@ namespace Chat.Client
                 }
                 else if(aux == 2)
                 {
-                    ConnectToReplicas();
-                    /*
-                     * ...:AJUSTAR:...
-                     * Enviar Mensagem de Leitura com o numero da ultima mensagem recebida
-                     */
-                    Send(Sequencer,Command.CatchUp, new string[]{"RECEIVE"});
+                    ConnectToReplicas();                    
                     Listen();
                 }
                 else
@@ -109,18 +106,36 @@ namespace Chat.Client
             {
                 try
                 {
-                    string message = replica.Receive();
-                    Console.WriteLine(message);
-                    /*
-                     * ...:AJUSTAR:...
-                     * Não mostrar mensagens repetidas
-                     */
+                    Send(replica,Command.CatchUp, new string[]{IdLastMessage.ToString()});
                 }
                 catch(System.IO.IOException)
                 {
-                    Console.WriteLine("error");
+                    Console.WriteLine("send error");
                 }
                 
+            }
+
+            foreach (Connection replica in Replicas)
+            {
+                try
+                {
+                    string message = replica.Receive();
+                    Console.WriteLine(message);
+                    while(message == "")
+                    {
+                        message = replica.Receive();
+                    }
+
+                    if(new Message(message).TotalOrder > IdLastMessage)
+                    {
+                        Console.WriteLine(new Message(message).Args);
+                        IdLastMessage = new Message(message).TotalOrder;
+                    }
+                }
+                catch(System.IO.IOException)
+                {
+                    Console.WriteLine("Receive error");
+                }
             }
         }
 
