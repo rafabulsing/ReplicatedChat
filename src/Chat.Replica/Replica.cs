@@ -224,6 +224,13 @@ namespace Chat.Replica
                         if (message.TotalOrder == NextMessageOrder)
                         {
                             LogMessage(message);
+
+                            while (EarlyMessages.ContainsKey(NextMessageOrder))
+                            {
+                                message = EarlyMessages[NextMessageOrder];
+                                EarlyMessages.Remove(NextMessageOrder);
+                                LogMessage(message);
+                            }
                         }
                         else
                         {
