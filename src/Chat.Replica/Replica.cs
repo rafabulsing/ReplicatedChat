@@ -29,6 +29,8 @@ namespace Chat.Replica
         private Server Server;
 
         private string LogFilePath;
+        private Dictionary<int, Message> EarlyMessages;
+        private int NextMessageOrder;
 
 
         public Replica(int id)
@@ -40,6 +42,9 @@ namespace Chat.Replica
             ReplicasIps = new List<string>();
             ReplicasPorts = new List<int>();
             Replicas = new List<Connection>();
+            EarlyMessages = new Dictionary<int, Message>();
+
+            NextMessageOrder = 0;
         }
 
 
@@ -146,6 +151,7 @@ namespace Chat.Replica
             {
                 w.WriteLine(message.TotalOrder + " " + message.Args[0]);
             }
+            ++NextMessageOrder;
         }
 
         
@@ -215,7 +221,21 @@ namespace Chat.Replica
                     }
                     else if (message.Command == Command.Send)
                     {
-                        LogMessage(message);
+                        if (message.TotalOrder == NextMessageOrder)
+                        {
+                            LogMessage(message);
+
+                            while (EarlyMessages.ContainsKey(NextMessageOrder))
+                            {
+                                message = EarlyMessages[NextMessageOrder];
+                                EarlyMessages.Remove(NextMessageOrder);
+                                LogMessage(message);
+                            }
+                        }
+                        else
+                        {
+                            EarlyMessages.Add(message.TotalOrder, message);
+                        }
                     }
                 }
                 catch (IOException)
@@ -225,7 +245,7 @@ namespace Chat.Replica
             }
         }
 
-
+        
         private void ConnectToSequencer()
         {
             var c = new Chat.Net.Client();
