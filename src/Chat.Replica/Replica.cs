@@ -191,7 +191,7 @@ namespace Chat.Replica
                             }
                         }
                     }
-                    else
+                    else if (message.Command == Command.Send)
                     {
                         /*
                          * ...::AJUSTAR::...
