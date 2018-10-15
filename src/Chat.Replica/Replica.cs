@@ -29,6 +29,7 @@ namespace Chat.Replica
         private Server Server;
 
         private string LogFilePath;
+        private List<Message> EarlyMessages;
 
 
         public Replica(int id)
@@ -40,6 +41,7 @@ namespace Chat.Replica
             ReplicasIps = new List<string>();
             ReplicasPorts = new List<int>();
             Replicas = new List<Connection>();
+            EarlyMessages = new List<Message>();
         }
 
 
