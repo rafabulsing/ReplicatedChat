@@ -29,7 +29,7 @@ namespace Chat.Replica
         private Server Server;
 
         private string LogFilePath;
-        private List<Message> EarlyMessages;
+        private Dictionary<int, Message> EarlyMessages;
         private int NextMessageOrder;
 
 
@@ -42,7 +42,7 @@ namespace Chat.Replica
             ReplicasIps = new List<string>();
             ReplicasPorts = new List<int>();
             Replicas = new List<Connection>();
-            EarlyMessages = new List<Message>();
+            EarlyMessages = new Dictionary<int, Message>();
 
             NextMessageOrder = 0;
         }
@@ -227,7 +227,7 @@ namespace Chat.Replica
                         }
                         else
                         {
-                            EarlyMessages.Add(message);
+                            EarlyMessages.Add(message.TotalOrder, message);
                         }
                     }
                 }
