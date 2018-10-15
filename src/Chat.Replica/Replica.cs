@@ -92,26 +92,25 @@ namespace Chat.Replica
                 var newConnection = Server.AcceptConnection();
                 string option = CategorizeConnection(newConnection);
                 
-                Thread t = new Thread(()=>HandleConnectionCatchUp(newConnection));
+                Thread t = new Thread(()=>HandleConnection(newConnection));
                 t.Start();
                 
             }       
         }
-        private void HandleConnectionCatchUp(Connection connection)
+        private void HandleConnection(Connection connection)
         {
 
             try
             {
-                string message = connection.Receive();
-                while("".Equals(message))
+                string messageStr = connection.Receive();
+                while("".Equals(messageStr))
                 {
-                    message = connection.Receive();
+                    messageStr = connection.Receive();
                 }
-                /*
-                 * ...::AJUSTAR::...
-                 * Pegar pelo CatchUp e não pelo RECOVER
-                 */
-                if("RECOVER".Equals(message))
+
+                var message = new Message(messageStr);
+
+                if(message.Command == Command.CatchUp)
                 {
                     connection.Send("Historico");
                     /*
