@@ -92,31 +92,63 @@ namespace Chat.Replica
             
             Console.WriteLine(String.Format("Replica {0} started.\nIP: {1}\nPort: {2}\n", Id, IpAddress, Port));
 
+
             ConnectToSequencer();
             Thread tSeq = new Thread(()=>Listen());
             tSeq.Start();
 
             ConnectToReplicas();
-            foreach (Connection replica in Replicas)
-            {
-                MessegerRecover(replica);
-            }
+            
+            Recover();
+            
             DisconnectFromReplicas();
 
             while(true)
             {
                 Console.WriteLine("Waiting for client connections...");
                 var newConnection = Server.AcceptConnection();
-                string option = CategorizeConnection(newConnection);
+                var connectionType = CategorizeConnection(newConnection);
                 
-                Thread t = new Thread(()=>HandleConnection(newConnection));
+                Thread t = new Thread(()=>HandleConnection(newConnection, connectionType));
                 t.Start();
                 
             }       
         }
+
+        public void Recover()
+        {
+            Console.WriteLine("Recovering...");
+
+            string line;
+            using (StreamReader r = new StreamReader(File.OpenRead(LogFilePath)))
+            {
+                while(!r.EndOfStream)
+                {
+                    line = r.ReadLine();
+                    Console.WriteLine(line);
+                    History.Add(line);
+                }
+            }
+
+            if (History.Count > 0)
+            {
+                var lastLine = History[History.Count-1];
+                NextMessageOrder = Int32.Parse(lastLine.Split(' ', 2)[0])+1;
+            }
+            else
+            {
+                NextMessageOrder = 0;
+            }
+
+            Console.WriteLine("Recovering from replicas...");
+            foreach (Connection replica in Replicas)
+            {
+                RecoverFromReplica(replica);
+            }
+        }
         
 
-        private void HandleConnection(Connection connection)
+        private void HandleConnection(Connection connection, ProcessType connectionType)
         {
 
             try
@@ -126,28 +158,23 @@ namespace Chat.Replica
                 {
                     messageStr = connection.Receive();
                 }
+                Console.WriteLine(messageStr);
 
                 var message = new Message(messageStr);
 
                 if(message.Command == Command.CatchUp)
                 { 
-                    var historyList = new List<string>();
-                    using (StreamReader r = new StreamReader(File.OpenRead(LogFilePath)))
+                    var lastMessage = Int32.Parse(message.Args[0]);
+
+                    var messages = new List<string>();
+                    for(int i=lastMessage; i<History.Count; ++i)
                     {
-                        for(int i=0; i<Int32.Parse(message.Args[0]); ++i)
-                        {
-                            r.ReadLine();
-                        }
-
-                        while(!r.EndOfStream)
-                        {
-                            historyList.Add(r.ReadLine());
-                        }
+                        messages.Add(History[i]);
                     }
-                    var history = historyList.ToArray();
 
-                    var reply = new Message(NextMessageOrder, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, history);
 
+                    var reply = new Message(NextMessageOrder-1, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, messages.ToArray());
+                    
                     connection.Send(reply.ToString());
 
                 }
@@ -165,27 +192,41 @@ namespace Chat.Replica
             {
                 w.WriteLine(message.TotalOrder + " " + message.Args[0]);
             }
+            History.Add(String.Format("{0} {1}", NextMessageOrder, message.Args[0]));
             ++NextMessageOrder;
         }
 
         
-        private void MessegerRecover(Connection connection)
+        private void RecoverFromReplica(Connection connection)
         {
             try
             {
-                bool recover = false;
-                while (recover == false)
+                var catchUpMsg = new Message(0, ProcessType.Replica, Id, 0, Command.CatchUp, NextMessageOrder.ToString());
+
+                connection.Send(catchUpMsg.ToString());
+
+                var replyStr = connection.Receive();
+                while(replyStr == "")
                 {
-                    connection.Send("RECOVER");
-                    string message = connection.Receive();
-                    /*
-                     * ...::AJUSTAR::...
-                     * Receber e salvar Log das replicas
-                     */
-                    Console.WriteLine(message);
-                    if (message != "")
+                    replyStr = connection.Receive();
+                }
+
+                var reply = new Message(replyStr);
+
+                using (StreamWriter w = File.AppendText(LogFilePath))
+                {
+                    foreach(var s in reply.Args)
                     {
-                        recover = true;
+                        var parts = s.Split(' ', 2);
+                        var order = Int32.Parse(parts[0]);
+                        
+                        if (order == NextMessageOrder)
+                        {
+                            Console.WriteLine(s);
+                            w.WriteLine(s);
+                            History.Add(s);
+                            ++NextMessageOrder;
+                        }
                     }
                 }
             }
@@ -272,7 +313,7 @@ namespace Chat.Replica
         }
 
 
-        private string CategorizeConnection(Connection connection)
+        private ProcessType CategorizeConnection(Connection connection)
         {
             var messageText = connection.Receive();
             var message = new Message(messageText);
@@ -280,18 +321,17 @@ namespace Chat.Replica
             if (message.Type == ProcessType.Client)
             {
                 Clients.Add(connection);
-                return "client";
             }
             else if (message.Type == ProcessType.Replica)
             {
                 Replicas.Add(connection);
-                return "replica";
             }
             else 
             {
                 connection.Disconnect();
-                return "nothing";
             }
+
+            return message.Type;
         }
 
 
