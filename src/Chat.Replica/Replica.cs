@@ -92,12 +92,12 @@ namespace Chat.Replica
                 var newConnection = Server.AcceptConnection();
                 string option = CategorizeConnection(newConnection);
                 
-                Thread t = new Thread(()=>HandleConnectionReplicas(newConnection));
+                Thread t = new Thread(()=>HandleConnectionCatchUp(newConnection));
                 t.Start();
                 
             }       
         }
-        private void HandleConnectionReplicas(Connection connection)
+        private void HandleConnectionCatchUp(Connection connection)
         {
 
             try
