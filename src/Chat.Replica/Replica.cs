@@ -30,6 +30,7 @@ namespace Chat.Replica
 
         private string LogFilePath;
         private List<Message> EarlyMessages;
+        private int NextMessageOrder;
 
 
         public Replica(int id)
@@ -42,6 +43,8 @@ namespace Chat.Replica
             ReplicasPorts = new List<int>();
             Replicas = new List<Connection>();
             EarlyMessages = new List<Message>();
+
+            NextMessageOrder = 0;
         }
 
 
@@ -227,7 +230,7 @@ namespace Chat.Replica
             }
         }
 
-
+        
         private void ConnectToSequencer()
         {
             var c = new Chat.Net.Client();
