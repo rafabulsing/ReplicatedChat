@@ -91,11 +91,10 @@ namespace Chat.Replica
                 Console.WriteLine("Waiting for client connections...");
                 var newConnection = Server.AcceptConnection();
                 string option = CategorizeConnection(newConnection);
-                if ("replica".Equals(option))
-                {
-                    Thread t = new Thread(()=>HandleConnectionReplicas(newConnection));
-                    t.Start();
-                }
+                
+                Thread t = new Thread(()=>HandleConnectionReplicas(newConnection));
+                t.Start();
+                
             }       
         }
         private void HandleConnectionReplicas(Connection connection)
