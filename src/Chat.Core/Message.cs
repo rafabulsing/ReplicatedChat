@@ -26,7 +26,7 @@ namespace Chat.Core
             Command = command;
             Args = args;
 
-            OriginalText = String.Format("{0}|{1}|{2}|{3}|{4}|", TotalOrder, Enum.GetName(typeof(ProcessType), Type), ProcessId, MessageId, Enum.GetName(typeof(Command), Command));
+            OriginalText = String.Format("{0}|{1}|{2}|{3}|{4}", TotalOrder, Enum.GetName(typeof(ProcessType), Type), ProcessId, MessageId, Enum.GetName(typeof(Command), Command));
 
             if (args != null)
             {
