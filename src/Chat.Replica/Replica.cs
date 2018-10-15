@@ -66,6 +66,13 @@ namespace Chat.Replica
                     ReplicasPorts.Add(configs["replicas"][i]["port"].Value<int>());
                 }
             }
+
+            var logFilePath = configs["replicas"][Id]["logFile"].Value<string>();
+
+            if (!File.Exists(logFilePath))
+            {
+                File.Create(logFilePath).Close();
+            }
         }
 
         public void Start()
