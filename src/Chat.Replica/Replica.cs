@@ -92,6 +92,8 @@ namespace Chat.Replica
             
             Console.WriteLine(String.Format("Replica {0} started.\nIP: {1}\nPort: {2}\n", Id, IpAddress, Port));
 
+            Recover();
+
             ConnectToSequencer();
             Thread tSeq = new Thread(()=>Listen());
             tSeq.Start();
@@ -114,6 +116,32 @@ namespace Chat.Replica
                 
             }       
         }
+
+        public void Recover()
+        {
+            Console.WriteLine("Recovering...");
+
+            string line;
+            using (StreamReader r = new StreamReader(File.OpenRead(LogFilePath)))
+            {
+                while(!r.EndOfStream)
+                {
+                    line = r.ReadLine();
+                    Console.WriteLine(line);
+                    History.Add(line);
+                }
+            }
+
+            if (History.Count > 0)
+            {
+                var lastLine = History[History.Count-1];
+                NextMessageOrder = Int32.Parse(lastLine.Split(' ', 2)[0]);
+            }
+            else
+            {
+                NextMessageOrder = 0;
+            }
+        }
         
 
         private void HandleConnection(Connection connection)
@@ -131,22 +159,14 @@ namespace Chat.Replica
 
                 if(message.Command == Command.CatchUp)
                 { 
-                    var historyList = new List<string>();
-                    using (StreamReader r = new StreamReader(File.OpenRead(LogFilePath)))
+                    var lastMessage = Int32.Parse(message.Args[0]);
+                    var messages = new List<string>();
+                    for(int i=lastMessage; i<History.Count; ++i)
                     {
-                        for(int i=0; i<Int32.Parse(message.Args[0]); ++i)
-                        {
-                            r.ReadLine();
-                        }
-
-                        while(!r.EndOfStream)
-                        {
-                            historyList.Add(r.ReadLine());
-                        }
+                        messages.Add(History[i]);
                     }
-                    var history = historyList.ToArray();
-
-                    var reply = new Message(NextMessageOrder, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, history);
+                    
+                    var reply = new Message(NextMessageOrder, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, messages.ToArray());
 
                     connection.Send(reply.ToString());
 
@@ -165,6 +185,7 @@ namespace Chat.Replica
             {
                 w.WriteLine(message.TotalOrder + " " + message.Args[0]);
             }
+            History.Add(String.Format("{0} {1}", NextMessageOrder, message.Args[0]));
             ++NextMessageOrder;
         }
 
