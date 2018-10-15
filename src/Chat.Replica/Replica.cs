@@ -112,7 +112,7 @@ namespace Chat.Replica
 
                 if(message.Command == Command.CatchUp)
                 {
-                    connection.Send("Historico");
+                    connection.Send(new Message(1,ProcessType.Replica,Id,0,Command.Send, "Historico").ToString());
                     /*
                      * ...::AJUSTAR::...
                      * Enviar Log para a conexão
