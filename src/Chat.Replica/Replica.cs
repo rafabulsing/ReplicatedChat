@@ -30,6 +30,7 @@ namespace Chat.Replica
 
         private string LogFilePath;
 
+
         public Replica(int id)
         {
             Id = id;
@@ -40,6 +41,7 @@ namespace Chat.Replica
             ReplicasPorts = new List<int>();
             Replicas = new List<Connection>();
         }
+
 
         public void Setup(FileStream configsFile)
         {
@@ -77,6 +79,7 @@ namespace Chat.Replica
             }
         }
 
+
         public void Start()
         {
             Server = new Server();
@@ -106,6 +109,8 @@ namespace Chat.Replica
                 
             }       
         }
+        
+
         private void HandleConnection(Connection connection)
         {
 
@@ -131,6 +136,15 @@ namespace Chat.Replica
             catch(System.IO.IOException)
             {
                 Console.WriteLine("Disconnected.");
+            }
+        }
+
+
+        private void LogMessage(Message message)
+        {
+            using (StreamWriter w = File.AppendText(LogFilePath))
+            {
+                w.WriteLine(message.TotalOrder + " " + message.Args[0]);
             }
         }
 
@@ -160,6 +174,7 @@ namespace Chat.Replica
                 Console.WriteLine("Disconnected.");
             }   
         }
+
 
         private void Listen()
         {
@@ -213,6 +228,7 @@ namespace Chat.Replica
             }
         }
 
+
         private void ConnectToSequencer()
         {
             var c = new Chat.Net.Client();
@@ -223,6 +239,7 @@ namespace Chat.Replica
 
             Console.WriteLine("Connected to Sequencer.");
         }
+
 
         private string CategorizeConnection(Connection connection)
         {
@@ -246,6 +263,7 @@ namespace Chat.Replica
             }
         }
 
+
         private void ConnectToReplicas()
         {
             DisconnectFromReplicas();
@@ -268,6 +286,7 @@ namespace Chat.Replica
                 }
             }
         }
+
 
         private void DisconnectFromReplicas()
         {
