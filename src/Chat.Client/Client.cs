@@ -128,7 +128,7 @@ namespace Chat.Client
 
                     if(new Message(message).TotalOrder > IdLastMessage)
                     {
-                        Console.WriteLine(new Message(message).Args);
+                        Console.WriteLine(new Message(message).Args[0]);
                         IdLastMessage = new Message(message).TotalOrder;
                     }
                 }
