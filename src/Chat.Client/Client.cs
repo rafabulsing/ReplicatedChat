@@ -31,13 +31,13 @@ namespace Chat.Client
         private int Id;
         private int MessageId;
 
-        private int IdLastMessage;
+        private int NextMessageOrder;
 
         public Client(int id)
         {
             Id = id;
             MessageId = 0;
-            IdLastMessage = 0;
+            NextMessageOrder = 0;
 
             ReplicasIps = new List<string>();
             ReplicasPorts = new List<int>();
@@ -106,7 +106,7 @@ namespace Chat.Client
             {
                 try
                 {
-                    Send(replica,Command.CatchUp, new string[]{IdLastMessage.ToString()});
+                    Send(replica,Command.CatchUp, new string[]{NextMessageOrder.ToString()});
                 }
                 catch(System.IO.IOException)
                 {
@@ -119,17 +119,25 @@ namespace Chat.Client
             {
                 try
                 {
-                    string message = replica.Receive();
-                    Console.WriteLine(message);
-                    while(message == "")
+                    string messageStr = replica.Receive();
+                    while(messageStr == "")
                     {
-                        message = replica.Receive();
+                        messageStr = replica.Receive();
                     }
 
-                    if(new Message(message).TotalOrder > IdLastMessage)
+                    Console.WriteLine(messageStr);
+                    var message = new Message(messageStr);
+
+                    foreach(var s in message.Args)
                     {
-                        Console.WriteLine(new Message(message).Args[0]);
-                        IdLastMessage = new Message(message).TotalOrder;
+                        var parts = s.Split(' ', 2);
+                        var order = Int32.Parse(parts[0]);
+                        
+                        if (order == NextMessageOrder)
+                        {
+                            Console.WriteLine(s);
+                            ++NextMessageOrder;
+                        }
                     }
                 }
                 catch(System.IO.IOException)
