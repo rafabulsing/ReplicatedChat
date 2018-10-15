@@ -13,6 +13,7 @@ namespace Chat.Net
             Socket = socket;
             Stream = socket.GetStream();
             Messenger = new Messenger();
+            ///socket.ReceiveTimeout = 500;
         }
 
         public void Send(string message)

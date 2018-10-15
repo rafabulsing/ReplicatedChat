@@ -2,10 +2,18 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
+using System.Threading;
+
 using Newtonsoft.Json.Linq;
 
 using Chat.Core;
 using Chat.Net;
+
+using System.Net;
+
+using System.Net.Sockets;
+
+using System.Text;
 
 namespace Chat.Client
 {
@@ -22,6 +30,7 @@ namespace Chat.Client
 
         private int Id;
         private int MessageId;
+        Semaphore semaphoreObject = new Semaphore(initialCount:1,maximumCount:1);
 
         public Client(int id)
         {
@@ -59,14 +68,66 @@ namespace Chat.Client
         public void Start()
         {
             ConnectToSequencer();
-            ConnectToReplicas();            
+            Menu();            
+        }
+        private void Menu()
+        {
+            while(true)
+            {
+                Console.WriteLine("Press 1 to send a message:");
+                Console.WriteLine("Press 2 to Receive messages:");
+                Console.WriteLine("Press 0 to exit:");
+
+                int aux = Convert.ToInt32(Console.ReadLine());
+                if(aux == 1)
+                {
+                    Console.WriteLine("Type a message:");
+                    string msg = Console.ReadLine();
+                    Send(Sequencer,Command.Send, new string[]{msg});
+                }
+                else if(aux == 2)
+                {
+                    ConnectToReplicas();
+                    /*
+                     * ...:AJUSTAR:...
+                     * Enviar Mensagem de Leitura com o numero da ultima mensagem recebida
+                     */
+                    Send(Sequencer,Command.CatchUp, new string[]{"RECEIVE"});
+                    Listen();
+                }
+                else
+                {
+                    break;
+                }
+
+            }
+        }
+
+        private void Listen()
+        {
+            foreach (Connection replica in Replicas)
+            {
+                try
+                {
+                    string message = replica.Receive();
+                    Console.WriteLine(message);
+                    /*
+                     * ...:AJUSTAR:...
+                     * Não mostrar mensagens repetidas
+                     */
+                }
+                catch(System.IO.IOException)
+                {
+                    Console.WriteLine("error");
+                }
+                
+            }
         }
 
         private void ConnectToSequencer()
         {
             var c = new Chat.Net.Client();
             Sequencer = c.Connect(SequencerIp, SequencerPort);
-            
             Send(Sequencer, Command.Connect);
         }
 
@@ -79,12 +140,12 @@ namespace Chat.Client
         private void ConnectToReplicas()
         {
             DisconnectFromReplicas();
-            for (int i=0; i<ReplicasCount; ++i)
+            for (int i=0; i<ReplicasCount; i++)
             {
                 try
                 {
                     var c = new Chat.Net.Client();
-                    var replica = c.Connect(ReplicasIps[i], ReplicasPorts[1]);
+                    var replica = c.Connect(ReplicasIps[i], ReplicasPorts[i]);
                     Replicas.Add(replica);
                     Send(replica, Command.Connect);
                     Console.WriteLine("Connected to replica " + i + ".");
@@ -95,13 +156,13 @@ namespace Chat.Client
                 }
             }
         }
-
         private void DisconnectFromReplicas()
         {
             foreach (var r in Replicas)
             {
                 r.Disconnect();
             }
+            Replicas.Clear();
         }
     }
 }

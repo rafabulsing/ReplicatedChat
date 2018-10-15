@@ -15,10 +15,13 @@ namespace Chat.Replica
         private string SequencerIp;
         private int SequencerPort;
         private Connection Sequencer;
-
         private List<string> History;
+        private List<string> ReplicasIps;
+        private List<int> ReplicasPorts;
+        private List<Connection> Replicas;
+        private int ReplicasCount;
 
-        private Dictionary<int, Connection> Clients;
+        private List<Connection> Clients;
 
         private int Id;
         private string IpAddress;
@@ -30,7 +33,10 @@ namespace Chat.Replica
             Id = id;
 
             History = new List<string>();
-            Clients = new Dictionary<int, Connection>();
+            Clients = new List<Connection>();
+            ReplicasIps = new List<string>();
+            ReplicasPorts = new List<int>();
+            Replicas = new List<Connection>();
         }
 
         public void Setup(FileStream configsFile)
@@ -49,6 +55,17 @@ namespace Chat.Replica
 
             IpAddress = configs["replicas"][Id]["ipAddress"].Value<string>();
             Port = configs["replicas"][Id]["port"].Value<int>();
+
+            ReplicasCount = configs["replicasCount"].Value<int>();
+
+            for (int i=0; i<ReplicasCount; ++i)
+            {
+                if(configs["replicas"][i]["port"].Value<int>() != Port)
+                {
+                    ReplicasIps.Add(configs["replicas"][i]["ipAddress"].Value<string>());
+                    ReplicasPorts.Add(configs["replicas"][i]["port"].Value<int>());
+                }
+            }
         }
 
         public void Start()
@@ -59,12 +76,132 @@ namespace Chat.Replica
             Console.WriteLine(String.Format("Replica {0} started.\nIP: {1}\nPort: {2}\n", Id, IpAddress, Port));
 
             ConnectToSequencer();
+            Thread tSeq = new Thread(()=>Listen());
+            tSeq.Start();
+
+            ConnectToReplicas();
+            foreach (Connection replica in Replicas)
+            {
+                MessegerRecover(replica);
+            }
+            DisconnectFromReplicas();
 
             while(true)
             {
                 Console.WriteLine("Waiting for client connections...");
-                AcceptClient();
+                var newConnection = Server.AcceptConnection();
+                string option = CategorizeConnection(newConnection);
+                if ("replica".Equals(option))
+                {
+                    Thread t = new Thread(()=>HandleConnectionReplicas(newConnection));
+                    t.Start();
+                }
             }       
+        }
+        private void HandleConnectionReplicas(Connection connection)
+        {
+
+            try
+            {
+                string message = connection.Receive();
+                while("".Equals(message))
+                {
+                    message = connection.Receive();
+                }
+                /*
+                 * ...::AJUSTAR::...
+                 * Pegar pelo CatchUp e não pelo RECOVER
+                 */
+                if("RECOVER".Equals(message))
+                {
+                    connection.Send("Historico");
+                    /*
+                     * ...::AJUSTAR::...
+                     * Enviar Log para a conexão
+                     */
+                }
+            }
+            catch(System.IO.IOException)
+            {
+                Console.WriteLine("Disconnected.");
+            }
+        }
+
+        
+        private void MessegerRecover(Connection connection)
+        {
+            try
+            {
+                bool recover = false;
+                while (recover == false)
+                {
+                    connection.Send("RECOVER");
+                    string message = connection.Receive();
+                    /*
+                     * ...::AJUSTAR::...
+                     * Receber e salvar Log das replicas
+                     */
+                    Console.WriteLine(message);
+                    if (message != "")
+                    {
+                        recover = true;
+                    }
+                }
+            }
+            catch(System.IO.IOException)
+            {
+                Console.WriteLine("Disconnected.");
+            }   
+        }
+
+        private void Listen()
+        {
+            while(true)
+            {
+                try
+                {
+                    string message = Sequencer.Receive();
+                    while("".Equals(message) )
+                    {
+                        message = Sequencer.Receive();
+                    }
+
+                    Console.WriteLine(message);
+
+                    if (new Message(message).Command == Command.CatchUp)
+                    {
+                        for (int i = 0; i < Clients.Count; i++)
+                        {
+                            try
+                            {
+                                /*
+                                 * ...::AJUSTAR::...
+                                 * Enviar todas mensagens que faltam
+                                 */
+                                Clients[i].Send(message);
+                            }
+                            catch(System.IO.IOException)
+                            {
+                                Clients[i].Disconnect();
+                                Clients.RemoveAt(i);
+                                i--;
+                                Console.WriteLine("Disconnected.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        /*
+                         * ...::AJUSTAR::...
+                         * salvar mensagem
+                         */
+                    }
+                }
+                catch (IOException)
+                {
+                    Console.WriteLine("Sequencer disconnected.");
+                }
+            }
         }
 
         private void ConnectToSequencer()
@@ -78,22 +215,58 @@ namespace Chat.Replica
             Console.WriteLine("Connected to Sequencer.");
         }
 
-        private void AcceptClient()
+        private string CategorizeConnection(Connection connection)
         {
-            var client = Server.AcceptConnection();
-            var msgStr = client.Receive();
+            var messageText = connection.Receive();
+            var message = new Message(messageText);
 
-            while(msgStr == "")
+            if (message.Type == ProcessType.Client)
             {
-                Thread.Sleep(50);
-                msgStr = client.Receive();
+                Clients.Add(connection);
+                return "client";
             }
+            else if (message.Type == ProcessType.Replica)
+            {
+                Replicas.Add(connection);
+                return "replica";
+            }
+            else 
+            {
+                connection.Disconnect();
+                return "nothing";
+            }
+        }
 
-            var msg = new Message(msgStr);
+        private void ConnectToReplicas()
+        {
+            DisconnectFromReplicas();
+            for (int i=0; i<ReplicasCount -1; i++)
+            {
+                try
+                {
+                    var c = new Chat.Net.Client();
+                    var replica = c.Connect(ReplicasIps[i], ReplicasPorts[i]);
+                    
+                    var msg = new Message(0,ProcessType.Replica,Id,0,Command.Connect);
+                    replica.Send(msg.ToString());
+                    
+                    Replicas.Add(replica);
+                    Console.WriteLine("Connected to replica " + i + ".");
+                }
+                catch
+                {
+                    Console.WriteLine("Failed to connect to replica " + i + ".");
+                }
+            }
+        }
 
-            Clients.Add(msg.ProcessId, client);
-
-            Console.WriteLine("Connected to client " + msg.ProcessId + ".");
+        private void DisconnectFromReplicas()
+        {
+            foreach (var r in Replicas)
+            {
+                r.Disconnect();
+            }
+            Replicas.Clear();
         }
 
     }

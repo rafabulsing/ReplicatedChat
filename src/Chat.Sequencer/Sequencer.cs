@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
+using System.Threading;
+
 using Newtonsoft.Json.Linq;
 
 using Chat.Core;
@@ -21,6 +23,8 @@ namespace Chat.Sequencer
         private int SeqNumber { get; set; }
 
         private List<string> History { get; set; }
+
+        Semaphore semaphoreObject = new Semaphore(initialCount: 1, maximumCount: 1);
 
         public Sequencer()
         {
@@ -53,45 +57,62 @@ namespace Chat.Sequencer
 
             Main();
         }
-
+        
         public void Main()
         {
             while(true)
             {
-                if (Server.Pending())
+                Console.WriteLine("Esperando clientes");
+                var newConnection = Server.AcceptConnection();
+                string option = CategorizeConnection(newConnection);
+                if ("client".Equals(option))
                 {
-                    var newConnection = Server.AcceptConnection();
-                    CategorizeConnection(newConnection);
+                    Thread t = new Thread(()=>HandleConnectionClients(newConnection));
+                    t.Start();
                 }
-
-                string message, sequenced;
-                foreach(var client in Clients)
-                {
-                    try{
-                        message = client.Receive();
-                        
-                        if (message != "")
-                        {
-                            sequenced = AddToSequence(message);
-                            
-                            foreach(var replica in Replicas)
-                            {
-                                replica.Send(sequenced);
-                            }
-
-                            Console.WriteLine(sequenced);
-                        }
-                    }
-                    catch (IOException)
-                    {
-                        Console.WriteLine("Client disconnected.");
-                    }
-                }
-     
             }
         }
 
-        private void CategorizeConnection(Connection connection)
+        private void HandleConnectionClients(Connection connection)
+        {
+            string message;
+            while(true)
+            {
+                message = connection.Receive();
+                if("".Equals(message))
+                {
+                    connection.Disconnect();
+                    Console.WriteLine("Client Disconnected.");
+                    break;
+                }
+                else
+                {
+                    if(new Message(message).Command == Command.Send)
+                    {
+                        message = AddToSequence(message);
+                        Console.WriteLine("Received: " + message);
+                    }
+
+                    for (int i = 0; i < Replicas.Count; i++)
+                    {
+                        try
+                        {
+                            Replicas[i].Send(message);
+                        }
+                        catch(System.IO.IOException)
+                        {
+                            Replicas[i].Disconnect();
+                            Replicas.RemoveAt(i);
+                            i--;
+                            Console.WriteLine("Replica Disconnected.");
+                        }
+                    }
+                    Console.WriteLine ("\n-----------------\n");
+                }
+            }
+        }
+
+        private string CategorizeConnection(Connection connection)
         {
             var messageText = connection.Receive();
             var message = new Message(messageText);
@@ -99,26 +120,28 @@ namespace Chat.Sequencer
             if (message.Type == ProcessType.Client)
             {
                 Clients.Add(connection);
+                return "client";
             }
             else if (message.Type == ProcessType.Replica)
             {
                 Replicas.Add(connection);
+                return "replica";
             }
             else 
             {
                 connection.Disconnect();
+                return "nothing";
             }
         }
 
         private string AddToSequence(string message)
         {
+            semaphoreObject.WaitOne();
             var sequenced = Message.CreateWithNewOrder(message, SeqNumber);
             ++SeqNumber;
             History.Add(sequenced);
+            semaphoreObject.Release();
             return sequenced;
         }
-
-        
-    
     }
 }
