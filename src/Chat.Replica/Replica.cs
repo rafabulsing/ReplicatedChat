@@ -220,7 +220,14 @@ namespace Chat.Replica
                     }
                     else if (message.Command == Command.Send)
                     {
-                        LogMessage(message);
+                        if (message.TotalOrder == NextMessageOrder)
+                        {
+                            LogMessage(message);
+                        }
+                        else
+                        {
+                            EarlyMessages.Add(message);
+                        }
                     }
                 }
                 catch (IOException)
