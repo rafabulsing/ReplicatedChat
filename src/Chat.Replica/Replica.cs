@@ -223,6 +223,7 @@ namespace Chat.Replica
                         if (message.TotalOrder == NextMessageOrder)
                         {
                             LogMessage(message);
+                            ++NextMessageOrder;
                         }
                         else
                         {
