@@ -32,6 +32,8 @@ namespace Chat.Replica
         private Dictionary<int, Message> EarlyMessages;
         private int NextMessageOrder;
 
+        private Semaphore sem = new Semaphore(1,1);
+
 
         public Replica(int id)
         {
@@ -92,14 +94,13 @@ namespace Chat.Replica
             
             Console.WriteLine(String.Format("Replica {0} started.\nIP: {1}\nPort: {2}\n", Id, IpAddress, Port));
 
+            ConnectToReplicas();
+            Recover();
 
             ConnectToSequencer();
             Thread tSeq = new Thread(()=>Listen());
             tSeq.Start();
 
-            ConnectToReplicas();
-            
-            Recover();
             
             DisconnectFromReplicas();
 
@@ -167,6 +168,7 @@ namespace Chat.Replica
                     var lastMessage = Int32.Parse(message.Args[0]);
 
                     var messages = new List<string>();
+                    sem.WaitOne();
                     for(int i=lastMessage; i<History.Count; ++i)
                     {
                         messages.Add(History[i]);
@@ -176,6 +178,7 @@ namespace Chat.Replica
                     var reply = new Message(NextMessageOrder-1, ProcessType.Replica, Id, message.MessageId, Command.CatchUp, messages.ToArray());
                     
                     connection.Send(reply.ToString());
+                    sem.Release();
 
                 }
             }
@@ -276,6 +279,7 @@ namespace Chat.Replica
                     }
                     else if (message.Command == Command.Send)
                     {
+                        sem.WaitOne();
                         if (message.TotalOrder == NextMessageOrder)
                         {
                             LogMessage(message);
@@ -291,6 +295,7 @@ namespace Chat.Replica
                         {
                             EarlyMessages.Add(message.TotalOrder, message);
                         }
+                        sem.Release();
                     }
                 }
                 catch (IOException)

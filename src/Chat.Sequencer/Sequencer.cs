@@ -25,7 +25,7 @@ namespace Chat.Sequencer
         private List<string> History { get; set; }
 
         Semaphore semaphoreObject = new Semaphore(initialCount: 1, maximumCount: 1);
-
+        Semaphore replicaSem = new Semaphore(1, 1);
         public Sequencer()
         {
             Server = new Server();
@@ -87,17 +87,27 @@ namespace Chat.Sequencer
                 }
                 else
                 {
+
+                    try
+                    {
+                        new Message(message);
+                    }
+                    catch(Exception)
+                    {
+                        continue;
+                    }
                 
                     message = AddToSequence(message);
                     Console.WriteLine("Received: " + message);
 
+                    replicaSem.WaitOne();
                     for (int i = 0; i < Replicas.Count; i++)
                     {
                         try
                         {
                             Replicas[i].Send(message);
                         }
-                        catch(System.IO.IOException)
+                        catch(Exception)
                         {
                             Replicas[i].Disconnect();
                             Replicas.RemoveAt(i);
@@ -105,6 +115,7 @@ namespace Chat.Sequencer
                             Console.WriteLine("Replica Disconnected.");
                         }
                     }
+                    replicaSem.Release();
                     Console.WriteLine ("-----------------");
                 }
             }
