@@ -33,6 +33,8 @@ namespace Chat.Client
 
         private int NextMessageOrder;
 
+        private string Username;
+
         public Client(int id)
         {
             Id = id;
@@ -70,33 +72,96 @@ namespace Chat.Client
         public void Start()
         {
             ConnectToSequencer();
+
+            Console.WriteLine("------------------------------\n");
+            Console.WriteLine("Pick a username:");
+            Username = Console.ReadLine();
+            Console.WriteLine("------------------------------\n");
+
             Menu();            
         }
+        
+        
         private void Menu()
         {
+            string input;
+            string[] parts;
             while(true)
             {
-                Console.WriteLine("Press 1 to send a message:");
-                Console.WriteLine("Press 2 to Receive messages:");
-                Console.WriteLine("Press 0 to exit:");
-
-                int aux = Convert.ToInt32(Console.ReadLine());
-                if(aux == 1)
+                Console.Write("> ");
+                input = Console.ReadLine();
+                parts = input.Split(' ', 2);
+                
+                string args;
+                if (parts.Length == 2)
                 {
-                    Console.WriteLine("Type a message:");
-                    string msg = Console.ReadLine();
-                    Send(Sequencer,Command.Send, new string[]{msg});
-                }
-                else if(aux == 2)
-                {
-                    ConnectToReplicas();                    
-                    Listen();
+                    args = parts[1];
                 }
                 else
                 {
-                    break;
+                    args = "";
                 }
 
+                switch (parts[0])
+                {
+                    case "send":
+                        SendCommand(args);
+                        break;
+
+                    case "read":
+                        ReadCommand(args);
+                        break;
+
+                    case "random":
+                        RandomCommand(Int32.Parse(args));
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void SendCommand(string arg)
+        {
+            Send(Sequencer,Command.Send, new string[]{Username + ": " + arg});
+        }
+
+        private void ReadCommand(string arg)
+        {
+            switch (arg)
+            {
+                case "":
+                    ConnectToReplicas();                    
+                    Listen();
+                    break;
+                
+                case "all":
+                    NextMessageOrder = 0;
+                    ConnectToReplicas();                    
+                    Listen();
+                    break;
+                
+                default:
+                    break;
+            }
+        }
+
+        private void RandomCommand(int reps)
+        {
+            string[] names = {"Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India","Juliet","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango","Uniform","Victor","Whiskey","X-ray","Yankee","Zulu"};
+
+            Random rng = new Random();
+
+            string msg;
+
+            for (int i=0; i<reps; ++i)
+            {
+                msg = String.Format("{0}: [{1}] {2}", Username, i, names[rng.Next(0, names.Length)]);
+
+                Console.WriteLine(msg);
+                Send(Sequencer,Command.Send, new string[]{msg});
+                Thread.Sleep(rng.Next(100));
             }
         }
 
@@ -115,6 +180,8 @@ namespace Chat.Client
                 
             }
 
+            Console.WriteLine("\n------------------------------\n");
+
             foreach (Connection replica in Replicas)
             {
                 try
@@ -124,8 +191,6 @@ namespace Chat.Client
                     {
                         messageStr = replica.Receive();
                     }
-
-                    Console.WriteLine(messageStr);
                     var message = new Message(messageStr);
 
                     foreach(var s in message.Args)
@@ -145,6 +210,8 @@ namespace Chat.Client
                     Console.WriteLine("Receive error");
                 }
             }
+
+            Console.WriteLine("\n------------------------------\n");
         }
 
         private void ConnectToSequencer()
@@ -171,11 +238,11 @@ namespace Chat.Client
                     var replica = c.Connect(ReplicasIps[i], ReplicasPorts[i]);
                     Replicas.Add(replica);
                     Send(replica, Command.Connect);
-                    Console.WriteLine("Connected to replica " + i + ".");
+                    //Console.WriteLine("Connected to replica " + i + ".");
                 }
                 catch
                 {
-                    Console.WriteLine("Failed to connect to replica " + i + ".");
+                    //Console.WriteLine("Failed to connect to replica " + i + ".");
                 }
             }
         }
